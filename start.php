@@ -194,8 +194,8 @@ session_start();
           <fieldset>
             </br>
             <div class="form-group">
-              <label for="inputEmail" class="col-lg-2 control-label">科别</label>
-              <div class="col-lg-10" style="padding-left: 45px; padding-right: 30px;">
+              <label for="inputEmail" class="col-lg-2 control-label" style="width: 120px;">科别</label>
+              <div class="col-lg-10" style="width: 405px;">
                 <input type="text" class="form-control" id="kebie" name="kebie" placeholder="科别关键字"> 
               </div>
             </div>
@@ -212,8 +212,8 @@ session_start();
               </div>
             </div>
             <div class="form-group">
-              <label for="inputPassword" class="col-lg-2 control-label">诊断</label>
-              <div class="col-lg-10" style="padding-left: 45px; padding-right: 30px;">
+              <label for="inputPassword" class="col-lg-2 control-label" style="width: 120px;">诊断</label>
+              <div class="col-lg-10" style="width: 405px;">
                 <input type="text" class="form-control" id="zhenduan" name="zhenduan" placeholder="诊断关键字"> 
               </div>
             </div>
