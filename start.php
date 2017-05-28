@@ -227,7 +227,7 @@ session_start();
         </form>
   </div>
   <div class="tab-pane fade active in" id="005">
-    <form class="form-horizontal" role="form" method="post" action="dosearch.php">
+    <form class="form-horizontal" role="form" method="post" action="listdetail.php">
           <fieldset>
             </br>
             <div class="form-group">

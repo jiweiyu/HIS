@@ -1,4 +1,141 @@
-<!DOCTYPE html>
+<?php
+	session_start();
+    //include_once "header.php";
+
+    require "class.connect.php";
+    $connect = new connect();
+    $conn = $connect->getConnect("his");
+    if(!$conn) { echo "failed to connect!";}
+        
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+
+	//search IgG+IgM
+    if(isset($_POST["IgG"]) && isset($_POST["IgGChange"]) && isset($_POST["IgM"]) && isset($_POST["IgMChange"])){
+
+    	//IgG+IgM持续阴性
+    	if($_POST["IgG"]== "0-阴性" && $_POST["IgGChange"] == "持续" && $_POST["IgM"]== "0-阴性" && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG= ? AND a2.IgG = ?))
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgM= ? AND a4.IgM = ?))
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $getresult->bind_param("ssss",$a,$a,$a,$a);
+    	}
+
+    	//IgG+IgM持续阳性
+    	if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "持续" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG IN (?,?)) AND (a2.IgG IN (?,?))
+				) 
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgG IN (?,?)) AND (a4.IgG IN (?,?)) 
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "1"; 
+	        $b = "2";
+	        $getresult->bind_param("ssssssss",$a,$b,$b,$a,$a,$b,$b,$a);
+    	}
+
+    	//IgG持续阳性 IgM持续阴性
+    	if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "持续" && $_POST["IgM"]== "0-阴性" && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG IN (?,?)) AND (a2.IgG IN (?,?))
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgM= ? AND a4.IgM = ?))
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("ssssss",$b,$c,$c,$c,$a,$a);
+    	}
+
+    	//IgG持续阴性 IgM持续阳性
+    	if($_POST["IgG"]== "0-阴性" && $_POST["IgGChange"] == "持续" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG= ? AND a2.IgG = ?))
+				) 
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgG IN (?,?)) AND (a4.IgG IN (?,?)) 
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "1"; 
+	        $b = "2";
+	        $c = "0";
+	        $getresult->bind_param("ssssssss",$c,$c,$b,$a,$a,$b);
+    	}
+
+			$getresult->execute();
+            $headresult = $getresult->get_result();
+            
+
+    }
+
+
+
+    //search 个人信息
+
+    //search 日期范围
+
+    //search 年龄性别
+
+    //search 科别项目
+
+
+?><!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -67,154 +204,219 @@
 <div class="col-md-12">
 <div class="panel panel-default">
   <!-- Default panel contents -->
-  <div class="panel-heading">Search Result</div>
 
-  <!-- Table -->
-	<table class="table table-striped table-hover "> 
-		<thead> 
-			<tr> 
-				<th>采样时间</th>
-				<th>检验时间</th>
-				<th>姓名</th>
-				<th>病员号</th> 
-				<th>卡号</th> 
-				<th>年龄</th> 
-				<th>性别</th> 
-				<th>科别</th>
-				<th>项目代码</th> 
-				<th>测定结果</th> 
-				<th>诊断</th> 
-				<th>标本种类</th>
-			</tr> 
-		</thead> 
-		<tbody> 
-			 <tr data-toggle="collapse" data-target="#demo1" class="accordion-toggle">
-				<td>2012/01/01</td> 
-				<td>2012/01/01</td> 
-				<td>陈荣祥</td> 
-				<td>123456</td> 
-				<td>12346</td> 
-				<td>66</td>
-				<td>男</td> 
-				<td>脑外科</td> 
-				<td>ALB3</td>
-				<td>33.3</td> 
-				<td>右侧额叶脑内血肿</td> 
-				<td>血清</td>
-			</tr> 
-			<tr >
-            	<td colspan="12" class="hiddenRow">
-            		<div class="accordian-body collapse" id="demo1">
-            			<div class="panel-heading" style="background:#F7DC6F">------------------------------------系列检验------------------------------------</div>
-            			<table class="table table-striped table-hover "> 
-            				<thead> 
-								<tr> 
-									<th>采样时间</th>
-									<th>检验时间</th>
-									<th>姓名</th>
-									<th>病员号</th> 
-									<th>卡号</th> 
-									<th>年龄</th> 
-									<th>性别</th> 
-									<th>科别</th>
-									<th>项目代码</th> 
-									<th>测定结果</th> 
-									<th>诊断</th> 
-									<th>标本种类</th>
-									<th>距上次检验(天)</th>
-									<th>差值</th>
-								</tr> 
-							</thead> 
-            				<tbody> 
-							 <tr class="warning">
-								<td>2012/01/01</td> 
-								<td>2012/01/01</td> 
-								<td >陈荣祥</td> 
-								<td>123456</td> 
-								<td>12346</td> 
-								<td>66</td>
-								<td>男</td> 
-								<td>脑外科</td> 
-								<td>ALB3</td>
-								<td>33.3</td> 
-								<td>右侧额叶脑内血肿</td> 
-								<td>血清</td>
-								<td>3</td>
-								<td>2.6</td>
-							</tr> 
-							 <tr class="active">
-								<td>2012/01/01</td> 
-								<td>2012/01/01</td> 
-								<td>陈荣祥</td> 
-								<td>123456</td> 
-								<td>12346</td> 
-								<td>66</td>
-								<td>男</td> 
-								<td>脑外科</td> 
-								<td>ALB3</td>
-								<td>33.3</td> 
-								<td>右侧额叶脑内血肿</td> 
-								<td>血清</td>
-								<td>3</td>
-								<td>2.6</td>
-							</tr> 
-							 <tr class="active">
-								<td>2012/01/01</td> 
-								<td>2012/01/01</td> 
-								<td>陈荣祥</td> 
-								<td>123456</td> 
-								<td>12346</td> 
-								<td>66</td>
-								<td>男</td> 
-								<td>脑外科</td> 
-								<td>ALB3</td>
-								<td>33.3</td> 
-								<td>右侧额叶脑内血肿</td> 
-								<td>血清</td>
-								<td>3</td>
-								<td>2.6</td>
-							</tr> 
-							</tbody>
-						</table>
-						<div class="panel-heading" style="background:#F7DC6F">------------------------------------系列检验------------------------------------</div>
-            		</div> 
-            	</td>
-        	</tr>
-			<tr data-toggle="collapse" data-target="#demo2" class="accordion-toggle">
-				<td>Jacob</td> 
-				<td>Thornton</td> 
-				<td>@fat</td> 
-				<td>Jacob</td> 
-				<td>Thornton</td> 
-				<td>@fat</td> 
-				<td>Jacob</td> 
-				<td>Thornton</td> 
-				<td>@fat</td> 
-				<td>Jacob</td> 
-				<td>Thornton</td> 
 
-			</tr> 
-			<tr >
-            	<td colspan="6" class="hiddenRow"><div class="accordian-body collapse" id="demo2"> Demo2 </div> </td>
-        	</tr>
-			<tr data-toggle="collapse" data-target="#demo3" class="accordion-toggle">
-				<td>Larry</td> 
-				<td>the Bird</td> 
-				<td>@twitter</td> 
-				<td>Larry</td> 
-				<td>the Bird</td> 
-				<td>@twitter</td> 
-				<td>Larry</td> 
-				<td>the Bird</td> 
-				<td>@twitter</td> 
-				<td>Larry</td> 
-				<td>the Bird</td> 
-			</tr> 
-			<tr >
-            	<td colspan="6" class="hiddenRow"><div class="accordian-body collapse" id="demo3"> Demo3 </div> </td>
-        	</tr>
-		</tbody> 
-	</table>
+  <?php
+                    if($headresult){
+                    	$headresult_total = mysqli_num_rows($headresult);
+                    	echo "
+                    	<div class='panel-heading'>Total Result: ".$headresult_total."</div>
+
+						<table class='table table-hover'> 
+								<thead> 
+									<tr> 
+										<th>采样时间</th>
+										<th>检验日期</th>
+										<th>姓名</th>
+										<th>病员号</th> 
+										<th>卡号</th> 
+										<th>年龄</th> 
+										<th>性别</th> 
+										<th>科别</th>
+										<th>IgG</th> 
+										<th>IgM</th> 
+										<th>诊断</th> 
+										<th>标本种类</th>
+									</tr> 
+								</thead> 
+								<tbody>
+                    	";
+
+                        while ($row = mysqli_fetch_array($headresult, MYSQLI_BOTH)){
+                            $head_jianyanriqi = $row['检验日期'];
+	                            $head_jianyanriqi_date = new DateTime($head_jianyanriqi);
+								$head_jianyanriqi_date->format('Y-m-d');
+								$head_y = date('Y',strtotime($head_jianyanriqi));
+                            $head_caiyangshijian = $row['采样时间'];
+                            $head_bingrenleixing = $row['病人类型'];
+                            $head_bingyuanhao = $row['病员号'];
+                            $head_kahao = $row['卡号'];
+                            $head_xingming = $row['姓名'];
+                            $head_age = $row['age'];
+                            	//head birthyear
+                            	$head_birthyear = $head_y - $head_age;
+                            $head_xingbie = $row['性别'];
+                            $head_kebie = $row['科别'];
+                            $head_IgG = $row['IgG'];
+                            $head_IgM = $row['IgM'];
+                            $head_zhenduan = $row['诊断'];
+                            $head_biaobenzhonglei = $row['标本种类'];
+                            $head_RID = $row['RID'];
+
+                            $findall_xingming = "%".$head_xingming."%";
+                            $findall_bingyuanhao = $head_bingyuanhao;
+                            $findall_kahao = $head_kahao;
+
+                            //按照最宽松的标准查询 考虑2012-2016跨越4年，年龄标准相差6，之后再检查具体birthyear
+                            $getalldata = $conn->prepare("
+                            	SELECT * FROM alldata
+								WHERE 姓名 LIKE ? 
+								AND ABS(年龄-?)<=6
+								AND (性别 IN (?))
+								ORDER BY 检验日期;
+                            	");
+                            $getalldata->bind_param("sss",$findall_xingming,$head_age,$head_xingbie);
+                            $getalldata->execute();
+                            $allresult = $getalldata->get_result();
+
+                            $total = mysqli_num_rows($allresult);
+                            if($total>0){
+                            	$headstatus = "active";
+                            }else{
+                            	$headstatus = "";
+                            }
+
+                         	echo "
+                           <tr data-toggle='collapse' data-target='#".$head_RID."' class='accordion-toggle ".$headstatus."'>
+								<td>".$head_caiyangshijian."</td> 
+								<td>".$head_jianyanriqi."</td> 
+								<td>".$head_xingming."</td> 
+								<td>".$head_bingyuanhao."</td> 
+								<td>".$head_kahao."</td> 
+								<td>".$head_age."</td>
+								<td>".$head_xingbie."</td> 
+								<td>".$head_kebie."</td> 
+								<td>".$head_IgG."</td>
+								<td>".$head_IgM."</td>
+								<td>".$head_zhenduan."</td>
+								<td>".$head_biaobenzhonglei."</td>
+							</tr> 
+                            ";
+
+                            
+                            if($allresult) {
+                            	//count the all data number
+                            	$i = 1;
+                            	//$total = mysqli_num_rows($allresult);
+                            	while ($allrow= mysqli_fetch_array($allresult,MYSQLI_BOTH)) {
+
+	                                $all_caiyangshijian = $allrow['采样时间'];
+	                                	$y = date('Y',strtotime($all_caiyangshijian));
+	                                $all_jianyanriqi = $allrow['检验日期'];
+	                                $all_xingming = $allrow['姓名'];
+	                                $all_bingyuanhao = $allrow['病员号'];
+	                                $all_kahao = $allrow['卡号'];
+	                                $all_nianling = $allrow['年龄'];
+	                                	//birthyear 
+	                                	$all_birthyear = $y - $all_nianling;
+	                                $all_xingbie = $allrow['性别'];
+	                                $all_kebie = $allrow['科别'];
+	                                $all_xiangmudaima = $allrow['项目代码'];
+	                                $all_cedingjieguo = $allrow['测定结果'];
+	                                $all_zhenduan = $allrow['诊断'];
+	                                $all_biaobenzhonglei = $allrow['标本种类'];
+	                                $all_RID = $allrow['RID'];
+
+	                                if($i == 1){
+	                                	//calculate the date_diff based on headdata
+	                                	$all_datediff = abs(strtotime($all_caiyangshijian) - strtotime($head_caiyangshijian));
+	                                	$years = floor($all_datediff / (365*60*60*24));
+										$months = floor(($all_datediff - $years * 365*60*60*24) / (30*60*60*24));
+										$days = floor(($all_datediff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+	                                	
+	                                	echo "
+				                           	<tr >
+							            	<td colspan='12' class='hiddenRow'>
+							            		<div class='accordian-body collapse' id='".$head_RID."'>
+							            			<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验: ".$total." ------------------------------------</div>
+							            			<table class='table table-hover'> 
+							            				<thead> 
+															<tr> 
+																<th>采样时间</th>
+																<th>检验日期</th>
+																<th>姓名</th>
+																<th>病员号</th> 
+																<th>卡号</th> 
+																<th>年龄</th> 
+																<th>性别</th> 
+																<th>科别</th>
+																<th>项目代码</th> 
+																<th>测定结果</th> 
+																<th>诊断</th> 
+																<th>标本种类</th> 
+																<th>距上次检验</th>
+																<th>差值</th>
+															</tr> 
+														</thead> 
+							            				<tbody> 
+							            ";
+	                                } else {
+	                                	//calculate the date_diff based on last alldata
+	                                	$all_datediff = abs(strtotime($all_caiyangshijian) - strtotime($last_caiyangshijian));
+	                                	$years = floor($all_datediff / (365*60*60*24));
+										$months = floor(($all_datediff - $years * 365*60*60*24) / (30*60*60*24));
+										$days = floor(($all_datediff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+	                                }
+
+
+	                                //#100: strong: 姓名、卡号、病员号、年龄（误差1年），性别都相同
+	                                if($all_bingyuanhao == $findall_bingyuanhao && $all_kahao == $findall_kahao && ABS($all_birthyear-$head_birthyear)<=1 ){
+	                                	$status = "";
+	                                	$last_caiyangshijian = $all_caiyangshijian;
+	                                }else if(ABS($all_birthyear-$head_birthyear)<=1){
+	                               	//#200: yello warning: 姓名、年龄（误差1年）、性别相同；病员号、卡号不相同
+	                                	$status = "warning";
+	                                	$last_caiyangshijian = $all_caiyangshijian;
+	                                }else if(ABS($all_birthyear-$head_birthyear)<=3){
+	                                //#300: red warning: 姓名相同；年龄相差1年以上，3年以下、性别相同；病员号、卡号不相同
+	                                	$status = "danger";
+	                                	$last_caiyangshijian = $all_caiyangshijian;
+	                                }else{
+	                                	$status = "notmatch";
+	                                }
+	                                
+	                                if($status!="notmatch"){
+	                            	echo "<tr class='".$status."'>
+													<td>".$all_caiyangshijian."</td> 
+													<td>".$all_jianyanriqi."</td> 
+													<td>".$all_xingming."</td> 
+													<td>".$all_bingyuanhao."</td> 
+													<td>".$all_kahao."</td> 
+													<td>".$all_nianling."</td>
+													<td>".$all_xingbie."</td> 
+													<td>".$all_kebie."</td> 
+													<td>".$all_xiangmudaima."</td>
+													<td>".$all_cedingjieguo."</td> 
+													<td>".$all_zhenduan."</td> 
+													<td>".$all_biaobenzhonglei."</td>
+													<td>".$years."年".$months."月".$days."天</td>
+													
+
+												</tr> 			
+		                            ";
+		                        	}
+
+			                        if ($i == $total){
+			                        	echo "</tbody>
+													</table>
+													<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验------------------------------------</div>
+							            		</div> 
+							            	</td>
+							        	</tr>
+							        	";
+			                        }
+			                        $i++;
+		                        }
+                            }
+                        }
+                    }
+
+    ?>
+
+	</tbody> 
+</table>
+
+
 </div>
 </div>
 </div>
