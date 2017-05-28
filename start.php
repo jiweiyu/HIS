@@ -80,25 +80,25 @@ session_start();
 </ul>
 <div id="myTabContent" class="tab-content">
   <div class="tab-pane fade" id="001">
-    <form class="form-horizontal" role="form" method="post" action="dosearch.php">
+    <form class="form-horizontal" role="form" method="post" action="listdetail_alldata.php">
           <fieldset>
             </br>
             <div class="form-group">
               <label for="inputEmail" class="col-lg-2 control-label">姓名</label>
               <div class="col-lg-10">
-                <input type="text" class="form-control" id="inputEmail" placeholder="姓名">
+                <input type="text" class="form-control" id="xingming" name="xingming" placeholder="姓名">
               </div>
             </div>
             <div class="form-group">
               <label for="inputPassword" class="col-lg-2 control-label">病员号</label>
               <div class="col-lg-10">
-                <input type="password" class="form-control" id="inputPassword" placeholder="病员号">
+                <input type="password" class="form-control" id="bingyuanhao" name="bingyuanhao" placeholder="病员号">
               </div>
             </div>
             <div class="form-group">
               <label for="inputEmail" class="col-lg-2 control-label">卡号</label>
               <div class="col-lg-10">
-                <input type="text" class="form-control" id="inputEmail" placeholder="卡号">
+                <input type="text" class="form-control" id="kahao" name="kahao" placeholder="卡号">
               </div>
             </div>
             <div class="form-group">
@@ -110,20 +110,20 @@ session_start();
           </fieldset>
         </form>
   </div>
-  <div class="tab-pane fade" id="002">
+  <div class="tab-pane fade" id="002" role="form" method="post" action="listdetail_alldata.php">
     <form class="form-horizontal">
           <fieldset>
             </br>
             <div class="form-group">
               <label for="inputEmail" class="col-lg-2 control-label" style="width: 120px;">起始日期</label>
               <div class="input-group date" style="width: 400px;">
-                  <input name="edate" id="startdate" type="text" class="form-control" onKeyUp="chInput('startdate')" onKeyDown="chInput('startdate')" placeholder="2012/01/01"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                  <input name="startdate" id="startdate" type="text" class="form-control" onKeyUp="chInput('startdate')" onKeyDown="chInput('startdate')" placeholder="2012/01/01"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
               </div>
             </div>
             <div class="form-group">
               <label for="inputPassword" class="col-lg-2 control-label" style="width: 120px;">结束日期</label>
               <div class="input-group date" style="width: 400px;">
-                  <input name="edate" id="enddate" type="text" class="form-control" onKeyUp="chInput('enddate')" onKeyDown="chInput('enddate')" placeholder="2016/12/31"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                  <input name="enddate" id="enddate" type="text" class="form-control" onKeyUp="chInput('enddate')" onKeyDown="chInput('enddate')" placeholder="2016/12/31"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
               </div>
             </div>
             <!--<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
@@ -159,21 +159,21 @@ session_start();
         </form>
   </div>
   <div class="tab-pane fade" id="003">
-    <form class="form-horizontal">
+    <form class="form-horizontal" role="form" method="post" action="listdetail_alldata.php">
           <fieldset>
             </br>
             <div class="form-group">
               <label for="inputEmail" class="col-lg-2 control-label">年龄</label>
               <div class="col-lg-10">
-                <input type="text" class="form-control" id="inputEmail" placeholder="from" style="width: 100px;"> 
+                <input type="text" class="form-control" id="fromage" name="fromage" placeholder="from" style="width: 100px;"> 
                 <br>
-                <input type="text" class="form-control" id="inputEmail" placeholder="to" style="width: 100px;">
+                <input type="text" class="form-control" id="toage" name="toage" placeholder="to" style="width: 100px;">
               </div>
             </div>
             <div class="form-group">
               <label for="inputPassword" class="col-lg-2 control-label">性别</label>
               <div class="col-lg-10">
-                 <select class="form-control" id="select">
+                 <select class="form-control" id="xingbie" name="xingbie">
                   <option>男</option>
                   <option>女</option>
                   <option>全部</option>
@@ -190,31 +190,31 @@ session_start();
         </form>
   </div>
   <div class="tab-pane fade" id="004">
-    <form class="form-horizontal">
+    <form class="form-horizontal" role="form" method="post" action="listdetail_alldata.php">
           <fieldset>
             </br>
             <div class="form-group">
               <label for="inputEmail" class="col-lg-2 control-label">科别</label>
               <div class="col-lg-10" style="padding-left: 45px; padding-right: 30px;">
-                <input type="text" class="form-control" id="inputEmail" placeholder="科别关键字"> 
+                <input type="text" class="form-control" id="kebie" name="kebie" placeholder="科别关键字"> 
               </div>
             </div>
             <div class="form-group">
               <label for="inputPassword" class="col-lg-2 control-label" style="width: 120px;">项目代码</label>
               <div class="col-lg-10" style="width: 405px;">
-                <input type="text" class="form-control" id="inputEmail" placeholder="项目代码关键字"> 
+                <input type="text" class="form-control" id="xiangmudaima" name="xiangmudaima" placeholder="项目代码关键字"> 
               </div>
             </div>
             <div class="form-group">
               <label for="inputPassword" class="col-lg-2 control-label" style="width: 120px;">测定结果</label>
               <div class="col-lg-10" style="width: 405px;">
-                <input type="text" class="form-control" id="inputEmail" placeholder="测定结果关键字"> 
+                <input type="text" class="form-control" id="cedingjieguo" name="cedingjieguo" placeholder="测定结果关键字"> 
               </div>
             </div>
             <div class="form-group">
               <label for="inputPassword" class="col-lg-2 control-label">诊断</label>
               <div class="col-lg-10" style="padding-left: 45px; padding-right: 30px;">
-                <input type="text" class="form-control" id="inputEmail" placeholder="诊断关键字"> 
+                <input type="text" class="form-control" id="zhenduan" name="zhenduan" placeholder="诊断关键字"> 
               </div>
             </div>
             <div class="form-group" style="width: 705px;">

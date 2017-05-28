@@ -22,13 +22,15 @@
 				FROM headdata a1, headdata a2
 				WHERE a1.姓名=a2.姓名
 				AND a1.采样时间<a2.采样时间
-				AND (a1.IgG= ? AND a2.IgG = ?))
+				AND (a1.IgG= ? AND a2.IgG = ?)
+				)
 				UNION 
 				(SELECT a3.*
 				FROM headdata a3, headdata a4
 				WHERE a3.姓名=a4.姓名
 				AND a3.采样时间<a4.采样时间
-				AND (a3.IgM= ? AND a4.IgM = ?))
+				AND (a3.IgM= ? AND a4.IgM = ?)
+				)
 				) as s
 				GROUP BY 姓名
 				HAVING 采样时间 = min(采样时间)
@@ -74,12 +76,14 @@
 				WHERE a1.姓名=a2.姓名
 				AND a1.采样时间<a2.采样时间
 				AND (a1.IgG IN (?,?)) AND (a2.IgG IN (?,?))
+				)
 				UNION 
 				(SELECT a3.*
 				FROM headdata a3, headdata a4
 				WHERE a3.姓名=a4.姓名
 				AND a3.采样时间<a4.采样时间
-				AND (a3.IgM= ? AND a4.IgM = ?))
+				AND (a3.IgM= ? AND a4.IgM = ?)
+				)
 				) as s
 				GROUP BY 姓名
 				HAVING 采样时间 = min(采样时间)
@@ -87,7 +91,7 @@
 	        $a = "0";
 	        $b = "1"; 
 	        $c = "2";
-	        $getresult->bind_param("ssssss",$b,$c,$c,$c,$a,$a);
+	        $getresult->bind_param("ssssss",$b,$c,$b,$c,$a,$a);
     	}
 
     	//IgG持续阴性 IgM持续阳性
@@ -99,8 +103,8 @@
 				FROM headdata a1, headdata a2
 				WHERE a1.姓名=a2.姓名
 				AND a1.采样时间<a2.采样时间
-				AND (a1.IgG= ? AND a2.IgG = ?))
-				) 
+				AND (a1.IgG= ? AND a2.IgG = ?)
+				)
 				UNION 
 				(SELECT a3.*
 				FROM headdata a3, headdata a4
@@ -118,8 +122,361 @@
 	        $getresult->bind_param("ssssssss",$c,$c,$b,$a,$a,$b);
     	}
 
-			$getresult->execute();
-            $headresult = $getresult->get_result();
+    	//IgG持续阳性，IgM转阳
+    	if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "持续" && $_POST["IgM"]== "0-阴性" && $_POST["IgMChange"] == "转阳" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG IN (?,?)) AND (a2.IgG IN (?,?))
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM = ?
+				AND a4.IgM IN (?,?)
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssssss",$b,$c,$b,$c,$a,$b,$c);
+	    }
+
+    	//IgG持续阳性，IgM转阴
+    	if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "持续" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "转阴" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG IN (?,?)) AND (a2.IgG IN (?,?))
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM IN (?,?)
+				AND a4.IgM = ?
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssssss",$b,$c,$b,$c,$b,$c,$a);
+	    }
+
+    	//IgG持续阴性，IgM转阳
+    	if($_POST["IgG"]== "0-阴性" && $_POST["IgGChange"] == "持续" && $_POST["IgM"]== "0-阴性" && $_POST["IgMChange"] == "转阳" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG= ? AND a2.IgG = ?)
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM = ?
+				AND a4.IgM IN (?,?)
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssss",$a,$a,$a,$c,$b);
+	    }
+
+		//IgG持续阴性，IgM转阴
+		if($_POST["IgG"]== "0-阴性" && $_POST["IgGChange"] == "持续" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "转阴"){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND (a1.IgG= ? AND a2.IgG = ?)
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM IN (?,?)
+				AND a4.IgM = ?
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssss",$a,$a,$b,$c,$a);
+	    }
+
+		//IgG转阳，IgM持续阳性
+		if($_POST["IgG"] == "0-阴性" && $_POST["IgGChange"] == "转阳" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM = ?
+				AND a2.IgM IN (?,?)
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgG IN (?,?)) AND (a4.IgG IN (?,?)) 
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssssss",$a,$c,$b,$b,$c,$b,$c);
+	    }
+
+		//IgG转阳，IgM持续阴性	
+		if($_POST["IgG"] == "0-阴性" && $_POST["IgGChange"] == "转阳" && $_POST["IgM"] == "0-阴性" && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM = ?
+				AND a2.IgM IN (?,?)
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgM= ? AND a4.IgM = ?)
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssss",$a,$c,$b,$a,$a);
+	    }	
+
+		//IgG转阳，IgM转阳
+		if($_POST["IgG"] == "0-阴性" && $_POST["IgGChange"] == "转阳" && $_POST["IgM"] == "0-阴性" && $_POST["IgMChange"] == "转阳" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM = ?
+				AND a2.IgM IN (?,?)
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM = ?
+				AND a4.IgM IN (?,?)
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("ssssss",$a,$c,$b,$a,$b,$c);
+	    }	
+
+		//IgG转阳，IgM转阴
+		if($_POST["IgG"] == "0-阴性" && $_POST["IgGChange"] == "转阳" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "转阴"){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM = ?
+				AND a2.IgM IN (?,?)
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM IN (?,?)
+				AND a4.IgM = ?
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("ssssss",$a,$c,$b,$b,$c,$a);
+	    }	
+
+		//IgG转阴，IgM持续阳性 
+		if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "转阴" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM IN (?,?)
+				AND a2.IgM = ?
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgG IN (?,?)) AND (a4.IgG IN (?,?)) 
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssssss",$b,$c,$a,$b,$c,$b,$c);
+	    }
+		
+		//IgG转阴，IgM持续阴性 
+		if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "转阴" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "持续" ){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM IN (?,?)
+				AND a2.IgM = ?
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND (a3.IgG IN (?,?)) AND (a4.IgG IN (?,?)) 
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("sssssss",$b,$c,$a,$b,$c,$b,$c);
+	    }	
+
+    	//IgG转阴，IgM转阳
+    	if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "转阴" && $_POST["IgM"] == "0-阴性" && $_POST["IgMChange"] == "转阳"){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM IN (?,?)
+				AND a2.IgM = ?
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM = ?
+				AND a4.IgM IN (?,?)
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("ssssss",$b,$c,$a,$a,$b,$c);
+	    }
+
+		//IgG转阴，IgM转阴
+	    if(($_POST["IgG"]== "1-阳性" OR $_POST["IgG"]== "2-弱阳性") && $_POST["IgGChange"] == "转阴" && ($_POST["IgM"]== "1-阳性" OR $_POST["IgM"]== "2-弱阳性") && $_POST["IgMChange"] == "转阴"){
+	        $getresult = $conn-> prepare("SELECT *
+				FROM
+				(
+				(SELECT a1.*
+				FROM headdata a1, headdata a2
+				WHERE a1.姓名=a2.姓名
+				AND a1.采样时间<a2.采样时间
+				AND a1.IgM IN (?,?)
+				AND a2.IgM = ?
+				)
+				UNION 
+				(SELECT a3.*
+				FROM headdata a3, headdata a4
+				WHERE a3.姓名=a4.姓名
+				AND a3.采样时间<a4.采样时间
+				AND a3.IgM IN (?,?)
+				AND a4.IgM = ?
+				)
+				) as s
+				GROUP BY 姓名
+				HAVING 采样时间 = min(采样时间)
+				"); 
+	        $a = "0";
+	        $b = "1"; 
+	        $c = "2";
+	        $getresult->bind_param("ssssss",$b,$c,$a,$c,$b,$a);
+	    }
+
+
+		$getresult->execute();
+        $headresult = $getresult->get_result();
             
 
     }
@@ -167,7 +524,7 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-	      <a class="navbar-brand" href="#">Dr LU</a>
+	      <a class="navbar-brand" href="start.php">Dr LU</a>
 	    </div>
 
 	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
