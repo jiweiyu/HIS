@@ -257,6 +257,23 @@
                             $findall_bingyuanhao = $head_bingyuanhao;
                             $findall_kahao = $head_kahao;
 
+                            //查询head数据中所有的检验数据
+                            $getheaddata = $conn->prepare("
+                            	SELECT * FROM headdata
+								WHERE 姓名 = ? 
+								ORDER BY 采样时间;
+                            	");
+                            $getheaddata->bind_param("s",$head_xingming);
+                            $getheaddata->execute();
+                            $allheadresult = $getheaddata->get_result();
+
+                            $headtotal = mysqli_num_rows($allheadresult);
+                            if($headtotal>0){
+                            	$headstatus = "active";
+                            }else{
+                            	$headstatus = "";
+                            }
+
                             //按照最宽松的标准查询 考虑2012-2016跨越4年，年龄标准相差6，之后再检查具体birthyear
                             $getalldata = $conn->prepare("
                             	SELECT * FROM alldata
@@ -276,22 +293,138 @@
                             	$headstatus = "";
                             }
 
+                            if($head_xingming!=""){
                          	echo "
-                           <tr data-toggle='collapse' data-target='#".$head_RID."' class='accordion-toggle ".$headstatus."'>
-								<td>".$head_caiyangshijian."</td> 
-								<td>".$head_jianyanriqi."</td> 
-								<td>".$head_xingming."</td> 
-								<td>".$head_bingyuanhao."</td> 
-								<td>".$head_kahao."</td> 
-								<td>".$head_age."</td>
-								<td>".$head_xingbie."</td> 
-								<td>".$head_kebie."</td> 
-								<td>".$head_IgG."</td>
-								<td>".$head_IgM."</td>
-								<td>".$head_zhenduan."</td>
-								<td>".$head_biaobenzhonglei."</td>
-							</tr> 
+	                           <tr data-toggle='collapse' data-target='.".$head_RID."' class='accordion-toggle ".$headstatus."'>
+									<td>".$head_caiyangshijian."</td> 
+									<td>".$head_jianyanriqi."</td> 
+									<td>".$head_xingming."</td> 
+									<td>".$head_bingyuanhao."</td> 
+									<td>".$head_kahao."</td> 
+									<td>".$head_age."</td>
+									<td>".$head_xingbie."</td> 
+									<td>".$head_kebie."</td> 
+									<td>".$head_IgG."</td>
+									<td>".$head_IgM."</td>
+									<td>".$head_zhenduan."</td>
+									<td>".$head_biaobenzhonglei."</td>
+								</tr> 
                             ";
+                        	}
+
+                        	if($allheadresult){
+                        		//count the all head data number
+                        		$i = 1;
+                        		$realtotal = 0;
+                        		while ($headrow= mysqli_fetch_array($allheadresult,MYSQLI_BOTH)) {
+                        			$newhead_jianyanriqi = $headrow['检验日期'];
+                        				$newhead_y = date('Y',strtotime($newhead_jianyanriqi));
+		                            $newhead_caiyangshijian = $headrow['采样时间'];
+		                            $newhead_bingrenleixing = $headrow['病人类型'];
+		                            $newhead_bingyuanhao = $headrow['病员号'];
+		                            $newhead_kahao = $headrow['卡号'];
+		                            $newhead_xingming = $headrow['姓名'];
+		                            $newhead_age = $headrow['age'];
+		                            	$newhead_birthyear = $newhead_y - $newhead_age;
+		                            $newhead_xingbie = $headrow['性别'];
+		                            $newhead_kebie = $headrow['科别'];
+		                            $newhead_IgG = $headrow['IgG'];
+		                            $newhead_IgM = $headrow['IgM'];
+		                            $newhead_zhenduan = $headrow['诊断'];
+		                            $newhead_biaobenzhonglei = $headrow['标本种类'];
+
+		                            if($i == 1){
+	                                	//calculate the date_diff based on headdata
+	                                	$all_datediff = abs(strtotime($newhead_caiyangshijian) - strtotime($head_caiyangshijian));
+	                                	$years = floor($all_datediff / (365*60*60*24));
+										$months = floor(($all_datediff - $years * 365*60*60*24) / (30*60*60*24));
+										$days = floor(($all_datediff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+	                                	
+	                                	echo "
+				                           	<tr >
+							            	<td colspan='12' class='hiddenRow'>
+							            		<div class='".$head_RID." accordian-body collapse' id='".$head_RID."'>
+							            			<div class='panel-heading' style='background:#F7DC6F'>------------------------------------IgG+IgM检验------------------------------------</div>
+							            			<table class='table table-hover'> 
+							            				<thead> 
+															<tr> 
+																<th>采样时间</th>
+																<th>检验日期</th>
+																<th>姓名</th>
+																<th>病员号</th> 
+																<th>卡号</th> 
+																<th>年龄</th> 
+																<th>性别</th> 
+																<th>科别</th>
+																<th>IgG</th> 
+																<th>IgM</th> 
+																<th>诊断</th> 
+																<th>标本种类</th>
+															</tr> 
+														</thead> 
+							            				<tbody> 
+							            ";
+	                                } else {
+	                                	//calculate the date_diff based on last alldata
+	                                	$all_datediff = abs(strtotime($newhead_caiyangshijian) - strtotime($last_caiyangshijian));
+	                                	$years = floor($all_datediff / (365*60*60*24));
+										$months = floor(($all_datediff - $years * 365*60*60*24) / (30*60*60*24));
+										$days = floor(($all_datediff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+	                                }
+
+	                                //#100: strong: 姓名、卡号、病员号、年龄（误差1年），性别都相同
+	                                if($newhead_bingyuanhao == $findall_bingyuanhao && $newhead_kahao == $findall_kahao && ABS($newhead_birthyear-$head_birthyear)<=1 ){
+	                                	$status = "";
+	                                	$last_caiyangshijian = $newhead_caiyangshijian;
+	                                }else if(ABS($newhead_birthyear-$head_birthyear)<=1){
+	                               	//#200: yello warning: 姓名、年龄（误差1年）、性别相同；病员号、卡号不相同
+	                                	$status = "warning";
+	                                	$last_caiyangshijian = $newhead_caiyangshijian;
+	                                }else if(ABS($newhead_birthyear-$head_birthyear)<=3){
+	                                //#300: red warning: 姓名相同；年龄相差1年以上，3年以下、性别相同；病员号、卡号不相同
+	                                	$status = "danger";
+	                                	$last_caiyangshijian = $newhead_caiyangshijian;
+	                                }else{
+	                                	$status = "notmatch";
+	                                }
+
+	                                if($status!="notmatch"){
+	                                $realtotal++;
+	                            	echo "<tr class='".$status."'>
+													<td>".$newhead_caiyangshijian."</td> 
+													<td>".$newhead_jianyanriqi."</td> 
+													<td>".$newhead_xingming."</td> 
+													<td>".$newhead_bingyuanhao."</td> 
+													<td>".$newhead_kahao."</td> 
+													<td>".$newhead_age."</td>
+													<td>".$newhead_xingbie."</td> 
+													<td>".$newhead_kebie."</td> 
+													<td>".$newhead_IgG."</td>
+													<td>".$newhead_IgM."</td> 
+													<td>".$newhead_zhenduan."</td> 
+													<td>".$newhead_biaobenzhonglei."</td>
+													<td>".$years."年".$months."月".$days."天</td>
+													
+												</tr> 			
+		                            ";
+		                        	}
+
+		                        	if ($i == $headtotal){
+			                        	echo "</tbody>
+													</table>
+													<div class='panel-heading' style='background:#F7DC6F'>------------------------------------IgG+IgM检验 共: ".$realtotal." 条------------------------------------</div>
+							            		</div> 
+							            	</td>
+							        	</tr>
+							        	";
+			                        }
+			                        $i++;
+
+
+
+                        		}
+
+                        	}
 
                             
                             if($allresult) {
@@ -328,8 +461,8 @@
 	                                	echo "
 				                           	<tr >
 							            	<td colspan='12' class='hiddenRow'>
-							            		<div class='accordian-body collapse' id='".$head_RID."'>
-							            			<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验------------------------------------</div>
+							            		<div class='".$head_RID." accordian-body collapse' id='".$head_RID."'>
+							            			<div class='panel-heading' style='background:#F7DC6F'>------------------------------------其他系列检验------------------------------------</div>
 							            			<table class='table table-hover'> 
 							            				<thead> 
 															<tr> 
@@ -401,7 +534,7 @@
 			                        if ($i == $total){
 			                        	echo "</tbody>
 													</table>
-													<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验 共: ".$realtotal." 条------------------------------------</div>
+													<div class='panel-heading' style='background:#F7DC6F'>------------------------------------其他系列检验 共: ".$realtotal." 条------------------------------------</div>
 							            		</div> 
 							            	</td>
 							        	</tr>
