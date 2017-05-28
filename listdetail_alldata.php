@@ -285,7 +285,7 @@
                             $allresult = $getalldata->get_result();
 
                             $total = mysqli_num_rows($allresult);
-                            if($total>0){
+                            if($total>1){
                             	$headstatus = "active";
                             }else{
                             	$headstatus = "";
@@ -425,7 +425,7 @@
                         	}
 
                             
-                            if($allresult) {
+                            if($total>1) {
                             	//count the all data number
                             	$i = 1;
                             	$realtotal = 0;
