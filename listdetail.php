@@ -297,6 +297,7 @@
                             if($allresult) {
                             	//count the all data number
                             	$i = 1;
+                            	$realtotal = 0;
                             	//$total = mysqli_num_rows($allresult);
                             	while ($allrow= mysqli_fetch_array($allresult,MYSQLI_BOTH)) {
 
@@ -328,7 +329,7 @@
 				                           	<tr >
 							            	<td colspan='12' class='hiddenRow'>
 							            		<div class='accordian-body collapse' id='".$head_RID."'>
-							            			<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验: ".$total." ------------------------------------</div>
+							            			<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验------------------------------------</div>
 							            			<table class='table table-hover'> 
 							            				<thead> 
 															<tr> 
@@ -376,6 +377,7 @@
 	                                }
 	                                
 	                                if($status!="notmatch"){
+	                                $realtotal++;
 	                            	echo "<tr class='".$status."'>
 													<td>".$all_caiyangshijian."</td> 
 													<td>".$all_jianyanriqi."</td> 
@@ -399,7 +401,7 @@
 			                        if ($i == $total){
 			                        	echo "</tbody>
 													</table>
-													<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验------------------------------------</div>
+													<div class='panel-heading' style='background:#F7DC6F'>------------------------------------系列检验 共: ".$realtotal." 条------------------------------------</div>
 							            		</div> 
 							            	</td>
 							        	</tr>
