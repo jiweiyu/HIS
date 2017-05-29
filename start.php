@@ -34,9 +34,9 @@ session_start();
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Dr LU</a>
+          <a class="navbar-brand" href="#">2012-2016安庆检验数据分析</a>
         </div>
-
+<!--
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">查询 <span class="sr-only">(current)</span></a></li>
@@ -63,6 +63,7 @@ session_start();
             <li><a href="#">Link</a></li>
           </ul>
         </div>
+-->
       </div>
     </nav>
 

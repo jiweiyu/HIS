@@ -477,19 +477,9 @@
 
 		$getresult->execute();
         $headresult = $getresult->get_result();
-            
+        $_SESSION['headresult']=$headresult;
 
     }
-
-
-
-    //search 个人信息
-
-    //search 日期范围
-
-    //search 年龄性别
-
-    //search 科别项目
 
 
 ?><!DOCTYPE html>
@@ -524,9 +514,11 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-	      <a class="navbar-brand" href="start.php">Dr LU</a>
+	      <a class="navbar-brand" href="start.php">重新搜索</a>
+	      <a class="navbar-brand" onclick=" window.open('tongji.php','_blank')">查看统计数据</a>
 	    </div>
 
+	    <!--
 	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
 	      <ul class="nav navbar-nav">
 	        <li class="active"><a href="#">Select <span class="sr-only">(current)</span></a></li>
@@ -554,6 +546,8 @@
 	        <li><a href="#">Link</a></li>
 	      </ul>
 	    </div>
+	-->
+
 	  </div>
 	</nav>
 <div class="col-lg-12 centered">
